@@ -41,7 +41,7 @@ class DropDatabase implements DropDatabaseInterface {
    */
   public function validateIsSupported() {
     $database = Database::getConnectionInfo('default');
-    return ($database['default'] && (count($database['default']) === 1) &&
+    return ($database['default'] && (count($database) === 1) &&
       isset($database['default']['prefix']['default']) &&
       is_string($database['default']['prefix']['default'])
     );

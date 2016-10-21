@@ -77,20 +77,27 @@ class DrupalResetForm extends ConfigFormBase {
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
     $config = $this->config('drupal_reset.drupalreset');
-    $form['drupal_reset_agree'] = [
-      '#type' => 'radios',
-      '#title' => $this->t('Select what to reset'),
-      '#description' => $this->t('Options available to delete the files directory and/or the database tables for the current site, resetting the site so that Drupal is ready to be reinstalled from scratch.'),
-      '#options' => array(
-        'reset_all' => $this->t('Delete all database tables and files'),
-        'reset_database' => $this->t('Delete only database tables'),
-        'reset_files' => $this->t('Delete only files'),
-      ),
-      '#default_value' => $config->get('drupal_reset_agree'),
-    ];
+    if ($this->drupalResetDropDatabase->validateIsSupported()) {
+      $form['drupal_reset_agree'] = [
+        '#type' => 'radios',
+        '#title' => $this->t('Select what to reset'),
+        '#description' => $this->t('Options available to delete the files directory and/or the database tables for the current site, resetting the site so that Drupal is ready to be reinstalled from scratch.'),
+        '#options' => array(
+          'reset_all' => $this->t('Delete all database tables and files'),
+          'reset_database' => $this->t('Delete only database tables'),
+          'reset_files' => $this->t('Delete only files'),
+        ),
+        '#default_value' => $config->get('drupal_reset_agree'),
+      ];
 
-    $form = parent::buildForm($form, $form_state);
-    $form['actions']['submit']['#value'] = $this->t('Reset this site');
+      $form = parent::buildForm($form, $form_state);
+      $form['actions']['submit']['#value'] = $this->t('Reset this site');
+    }
+    else {
+      $form['drupal_reset_message'] = array(
+        '#markup' => '<p>Your database configuration is not supported by Drupal Reset. There must be one database (no master/slave) and the table prefix must be set to a string (not an array); use the empty string if you do not want a prefix. See your settings.php file.</p>',
+      );
+    }
 
     return $form;
   }
